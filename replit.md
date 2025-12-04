@@ -83,3 +83,21 @@ The system prompt is carefully crafted to provide helpful, culturally appropriat
 - Express middleware configured with JSON body parsing and raw body capture for webhook support
 
 **Asset Management**: Static assets stored in attached_assets directory with Vite alias configuration (@assets) for easy importing. Images include owner photos and hero images for the homepage.
+
+## Vercel Deployment
+
+The application is configured for deployment to Vercel with the following structure:
+
+**Frontend**: Static site built with Vite, deployed to Vercel's CDN
+**Backend**: Serverless function in `/api/chat.ts` for HiTech Bot AI integration
+
+**Key Files for Vercel**:
+- `vercel.json` - Vercel configuration with build settings and rewrites
+- `api/chat.ts` - Serverless function handling chat requests with Gemini AI
+- `VERCEL_DEPLOYMENT.md` - Detailed deployment instructions
+
+**Environment Variables for Vercel**:
+- `GEMINI_API_KEY` - Required for HiTech Bot chatbot functionality (set in Vercel dashboard)
+
+**Build Command**: `npx vite build`
+**Output Directory**: `dist/public`
