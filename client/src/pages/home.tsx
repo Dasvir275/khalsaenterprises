@@ -296,7 +296,7 @@ export default function Home() {
                 </Badge>
                 
                 <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2" data-testid="text-meet-expert">
-                  Meet Our Expert
+                  Meet Our Expert(Dasvir Singh)
                 </h3>
                 <p className="text-lg text-muted-foreground mb-4" style={{ fontFamily: 'Noto Sans Gurmukhi, sans-serif' }} data-testid="text-meet-expert-punjabi">
                   ਸਾਡੇ ਮਾਹਰ ਨੂੰ ਮਿਲੋ
@@ -308,8 +308,9 @@ export default function Home() {
                       <Building className="w-5 h-5 text-orange-600" />
                     </div>
                     <div className="text-left">
-                      <p className="font-semibold text-foreground">B.Tech CSE 2025</p>
+                      <p className="font-semibold text-foreground">B.Tech Computer Science&Engineering 2021-2025</p>
                       <p className="text-sm text-muted-foreground">Thapar University, Patiala</p>
+                       <p className="text-sm text-muted-foreground">Winner National Level Smart India Hackathon 2023 Under Ministry of Jal Shakti and Indore State Muncipal Corporation,Madhya Pradesh,2024</p>
                     </div>
                   </div>
                   
@@ -320,6 +321,7 @@ export default function Home() {
                     <div className="text-left">
                       <p className="font-semibold text-foreground">AI Software Engineer</p>
                       <p className="text-sm text-muted-foreground">Project Studio</p>
+                       <p className="text-sm text-muted-foreground">Ex Cyber Security Engineer At DigitalXforce Limited,U.S.A(Texas)</p>
                     </div>
                   </div>
                   
