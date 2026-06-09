@@ -101,8 +101,15 @@
                 ✅ Email sent successfully to {{ lastSentTo }}!
               </div>
               <div v-else-if="status === 'error'"
-                   class="text-center py-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-sm">
-                ❌ Failed to send. Check credentials or try again.
+                   class="py-3 px-4 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-sm space-y-1">
+                <p class="font-semibold">❌ Failed to send</p>
+                <p class="text-xs text-red-300 break-all">{{ errorMsg }}</p>
+                <p v-if="errorMsg.includes('credential') || errorMsg.includes('env')" class="text-xs text-yellow-400 mt-1">
+                  ⚠️ Add EMAIL_USER and EMAIL_PASS in Vercel Dashboard → Settings → Environment Variables, then redeploy.
+                </p>
+                <p v-if="errorMsg.includes('404') || errorMsg.includes('fetch')" class="text-xs text-yellow-400 mt-1">
+                  ⚠️ API routes only work on Vercel. Run <code class="bg-black/30 px-1 rounded">vercel dev</code> locally instead of <code class="bg-black/30 px-1 rounded">npm run dev</code>.
+                </p>
               </div>
             </Transition>
 
@@ -189,6 +196,7 @@ defineEmits(['close'])
 const fileInput  = ref(null)
 const sending    = ref(false)
 const status     = ref('')
+const errorMsg   = ref('')
 const lastSentTo = ref('')
 const attachment = ref(null)
 
@@ -280,8 +288,9 @@ function handleFile(e) {
 async function sendEmail() {
   sending.value = true
   status.value  = ''
+  errorMsg.value = ''
   try {
-    const res = await fetch('/api/send-client-email', {
+    const res  = await fetch('/api/send-client-email', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({
@@ -291,14 +300,16 @@ async function sendEmail() {
         attachment: attachment.value,
       }),
     })
-    if (!res.ok) throw new Error()
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error || `Server error ${res.status}`)
     lastSentTo.value = form.value.to
     status.value     = 'sent'
     form.value       = { to: '', subject: '', body: '' }
     attachment.value = null
     setTimeout(() => { status.value = '' }, 6000)
-  } catch {
-    status.value = 'error'
+  } catch (err) {
+    status.value   = 'error'
+    errorMsg.value = err.message || 'Unknown error'
   } finally {
     sending.value = false
   }

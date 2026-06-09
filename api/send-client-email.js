@@ -90,29 +90,38 @@ export default async function handler(req, res) {
 
   if (!to || !subject || !body) return res.status(400).json({ error: 'to, subject, body are required' })
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  })
-
-  const mailOptions = {
-    from: `"Khalsa HiTech Enterprises" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html: buildClientHtml(subject, body),
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    return res.status(500).json({ error: 'Email credentials not configured in environment variables.' })
   }
 
-  if (attachment?.data) {
-    mailOptions.attachments = [{
-      filename: attachment.name || 'attachment',
-      content:  attachment.data,
-      encoding: 'base64',
-    }]
-  }
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS.replace(/\s/g, ''),
+      },
+    })
 
-  await transporter.sendMail(mailOptions)
-  res.status(200).json({ ok: true })
+    const mailOptions = {
+      from: `"Khalsa HiTech Enterprises" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html: buildClientHtml(subject, body),
+    }
+
+    if (attachment?.data) {
+      mailOptions.attachments = [{
+        filename: attachment.name || 'attachment',
+        content:  attachment.data,
+        encoding: 'base64',
+      }]
+    }
+
+    await transporter.sendMail(mailOptions)
+    res.status(200).json({ ok: true })
+  } catch (err) {
+    console.error('send-client-email error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
 }

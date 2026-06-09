@@ -88,20 +88,29 @@ export default async function handler(req, res) {
 
   if (!name || !phone) return res.status(400).json({ error: 'name and phone are required' })
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  })
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    return res.status(500).json({ error: 'Email credentials not configured in environment variables.' })
+  }
 
-  await transporter.sendMail({
-    from: `"Khalsa HiTech Website" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,
-    subject: `🔔 New ${type} from ${name} | Khalsa HiTech`,
-    html: buildNotificationHtml({ type, name, phone, email, service, message, date, time, meetingType, notes }),
-  })
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS.replace(/\s/g, ''),
+      },
+    })
 
-  res.status(200).json({ ok: true })
+    await transporter.sendMail({
+      from: `"Khalsa HiTech Website" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      subject: `🔔 New ${type} from ${name} | Khalsa HiTech`,
+      html: buildNotificationHtml({ type, name, phone, email, service, message, date, time, meetingType, notes }),
+    })
+
+    res.status(200).json({ ok: true })
+  } catch (err) {
+    console.error('send-notification error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
 }
