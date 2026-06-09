@@ -51,6 +51,11 @@
       <BookingSection v-if="showBooking" @close="showBooking = false" />
     </Transition>
 
+    <!-- Email Composer (Ctrl+Shift+M) -->
+    <Transition name="modal">
+      <EmailComposer v-if="showEmailComposer" @close="showEmailComposer = false" />
+    </Transition>
+
     <!-- Scroll to top -->
     <Transition name="fade">
       <button v-if="showTop"
@@ -77,11 +82,13 @@ import FooterSection from './components/FooterSection.vue'
 import ChatBot       from './components/ChatBot.vue'
 import ServiceModal  from './components/ServiceModal.vue'
 import NewsTicker    from './components/NewsTicker.vue'
+import EmailComposer from './components/EmailComposer.vue'
 
-const activeService = ref(null)
-const showBooking   = ref(false)
-const showTop       = ref(false)
-const scrollY       = ref(0)
+const activeService   = ref(null)
+const showBooking     = ref(false)
+const showEmailComposer = ref(false)
+const showTop         = ref(false)
+const scrollY         = ref(0)
 
 const scrollProgress = computed(() => {
   const total = document.documentElement.scrollHeight - window.innerHeight
@@ -129,8 +136,16 @@ const particles = Array.from({ length: 25 }, (_, i) => ({
   },
 }))
 
+function onKeydown(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === 'M') {
+    e.preventDefault()
+    showEmailComposer.value = !showEmailComposer.value
+  }
+}
+
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('keydown', onKeydown)
 
   // Reveal on scroll
   const io = new IntersectionObserver((entries) => {
@@ -146,6 +161,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('keydown', onKeydown)
 })
 </script>
 

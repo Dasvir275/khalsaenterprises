@@ -9,8 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.27",
-    "@emailjs/browser": "^4.3.3"
+    "@emailjs/browser": "^4.3.3",
+    "nodemailer": "^8.0.10",
+    "vue": "^3.4.27"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
