@@ -22,9 +22,9 @@ export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || ''
 //    {{from_phone}}, {{from_email}}, {{message}}, {{to_email}}
 // 4. Copy Service ID, Template ID, Public Key below
 // ─────────────────────────────────────────────────────────────────────────────
-export const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID'   // e.g. service_abc123
-export const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID'  // e.g. template_xyz789
-export const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY'   // e.g. aBcDeFgHiJkLmNop
+export const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  || ''
+export const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || ''
+export const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || ''
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Google Meet Booking

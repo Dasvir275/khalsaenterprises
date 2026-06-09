@@ -104,11 +104,8 @@
                    class="py-3 px-4 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-sm space-y-1">
                 <p class="font-semibold">❌ Failed to send</p>
                 <p class="text-xs text-red-300 break-all">{{ errorMsg }}</p>
-                <p v-if="errorMsg.includes('credential') || errorMsg.includes('env')" class="text-xs text-yellow-400 mt-1">
-                  ⚠️ Add EMAIL_USER and EMAIL_PASS in Vercel Dashboard → Settings → Environment Variables, then redeploy.
-                </p>
-                <p v-if="errorMsg.includes('404') || errorMsg.includes('fetch')" class="text-xs text-yellow-400 mt-1">
-                  ⚠️ API routes only work on Vercel. Run <code class="bg-black/30 px-1 rounded">vercel dev</code> locally instead of <code class="bg-black/30 px-1 rounded">npm run dev</code>.
+                <p class="text-xs text-yellow-400 mt-1">
+                  ⚠️ Make sure VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID and VITE_EMAILJS_PUBLIC_KEY are set in Vercel → Settings → Environment Variables.
                 </p>
               </div>
             </Transition>
@@ -190,6 +187,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import emailjs from '@emailjs/browser'
+import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY } from '@/config.js'
 
 defineEmits(['close'])
 
@@ -276,32 +275,31 @@ function handleFile(e) {
   const reader = new FileReader()
   reader.onload = () => {
     attachment.value = {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      data: reader.result.split(',')[1], // base64 only
+      name:    file.name,
+      size:    file.size,
+      type:    file.type,
+      dataUrl: reader.result, // full data URL for inline image
     }
   }
   reader.readAsDataURL(file)
 }
 
 async function sendEmail() {
-  sending.value = true
-  status.value  = ''
+  sending.value  = true
+  status.value   = ''
   errorMsg.value = ''
   try {
-    const res  = await fetch('/api/send-client-email', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({
-        to:         form.value.to,
-        subject:    form.value.subject,
-        body:       form.value.body,
-        attachment: attachment.value,
-      }),
-    })
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) throw new Error(data.error || `Server error ${res.status}`)
+    const params = {
+      to_email:  form.value.to,
+      subject:   form.value.subject,
+      from_name: 'Dasvir Singh – Khalsa HiTech Enterprises',
+      message:   form.value.body,
+      type:      'Client Email',
+    }
+    if (attachment.value?.dataUrl) {
+      params.attachment_html = `<br><img src="${attachment.value.dataUrl}" alt="${attachment.value.name}" style="max-width:100%;border-radius:8px;margin-top:12px;" />`
+    }
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params, EMAILJS_PUBLIC_KEY)
     lastSentTo.value = form.value.to
     status.value     = 'sent'
     form.value       = { to: '', subject: '', body: '' }
@@ -309,7 +307,7 @@ async function sendEmail() {
     setTimeout(() => { status.value = '' }, 6000)
   } catch (err) {
     status.value   = 'error'
-    errorMsg.value = err.message || 'Unknown error'
+    errorMsg.value = err?.text || err?.message || 'Unknown error'
   } finally {
     sending.value = false
   }

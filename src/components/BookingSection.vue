@@ -225,7 +225,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { RAZORPAY_KEY_ID, GOOGLE_MEET_BOOKING_URL, CONTACT } from '@/config.js'
+import emailjs from '@emailjs/browser'
+import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, RAZORPAY_KEY_ID, GOOGLE_MEET_BOOKING_URL, CONTACT } from '@/config.js'
 
 defineEmits(['close'])
 
@@ -269,21 +270,20 @@ const consultationFee = computed(() => booking.value.meetingType === 'online' ? 
 
 async function confirmBooking() {
   try {
-    await fetch('/api/send-notification', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type:        'Meeting Booking',
-        name:        booking.value.name,
-        phone:       booking.value.phone,
-        email:       booking.value.email || '',
+    await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      {
+        to_email:    CONTACT.email,
+        subject:     `📅 New Booking from ${booking.value.name} – ${booking.value.service}`,
+        from_name:   booking.value.name,
+        from_phone:  booking.value.phone,
         service:     booking.value.service,
-        meetingType: booking.value.meetingType,
-        date:        booking.value.date,
-        time:        booking.value.time,
-        notes:       booking.value.notes,
-      }),
-    })
+        message:     `Meeting Type: ${booking.value.meetingType === 'online' ? 'Google Meet (Online)' : 'In-Person'}\nDate: ${booking.value.date}\nTime: ${booking.value.time}\nNotes: ${booking.value.notes || '—'}`,
+        type:        'Meeting Booking',
+      },
+      EMAILJS_PUBLIC_KEY,
+    )
   } catch { /* silent – booking still proceeds */ }
   currentStep.value = 3
 }

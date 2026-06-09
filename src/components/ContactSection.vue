@@ -98,6 +98,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import emailjs from '@emailjs/browser'
+import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY } from '@/config.js'
 
 const sending = ref(false)
 const sent    = ref(false)
@@ -121,23 +123,25 @@ const contactItems = [
 async function submitContact() {
   sending.value = true
   try {
-    const res = await fetch('/api/send-notification', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type:    'Contact Enquiry',
-        name:    form.value.name,
-        phone:   form.value.phone,
-        service: form.value.service || 'General Enquiry',
-        message: form.value.message,
-      }),
-    })
-    if (!res.ok) throw new Error()
+    await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      {
+        to_email:  'dasvirsingh07@gmail.com',
+        subject:   `🔔 New Contact Enquiry from ${form.value.name}`,
+        from_name: form.value.name,
+        from_phone: form.value.phone,
+        service:   form.value.service || 'General Enquiry',
+        message:   form.value.message || '—',
+        type:      'Contact Enquiry',
+      },
+      EMAILJS_PUBLIC_KEY,
+    )
     sent.value = true
     form.value = { name: '', phone: '', service: '', message: '' }
     setTimeout(() => { sent.value = false }, 5000)
   } catch {
-    alert('Failed to send message. Please call 70090-73061 directly.')
+    alert('Failed to send. Please call 70090-73061 directly.')
   } finally {
     sending.value = false
   }
